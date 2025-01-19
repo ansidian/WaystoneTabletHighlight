@@ -86,6 +86,10 @@ public class TabletScoreSettings
 
     [Menu("Score per 1% item quantity in tablet")]
     public RangeNode<int> ScorePerQuantity { get; set; } = new RangeNode<int>(4, 0, 100);
+
+    [Menu("Score per 1% increased rares in tablet")]
+    public RangeNode<int> ScorePerIncreasedRares { get; set; } = new RangeNode<int>(3, 0, 100);
+
 }
 
 [Submenu(CollapsedByDefault = false)]
