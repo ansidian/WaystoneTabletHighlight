@@ -10,10 +10,13 @@ namespace WaystoneHighlight;
 
 public class WaystoneHighlightSettings : ISettings
 {
-  public ToggleNode Enable { get; set; } = new ToggleNode(false);
+    public ToggleNode Enable { get; set; } = new ToggleNode(false);
 
     [Menu("Score Features")]
     public ScoreSettings Score { get; set; } = new ScoreSettings();
+    
+    [Menu("Tablet Score Features")]
+    public TabletScoreSettings TabletScore { get; set; } = new TabletScoreSettings();
     
     [Menu("Graphics, Colors, and Font Settings")]    
     public GraphicSettings Graphics { get; set; } = new GraphicSettings();
@@ -68,6 +71,21 @@ public class ScoreSettings
     [JsonIgnore]
     public ButtonNode ReloadBannedModifiers { get; set; } = new ButtonNode();
 
+}
+
+[Submenu(CollapsedByDefault = false)]
+public class TabletScoreSettings
+{
+    public ToggleNode Enable { get; set; } = new ToggleNode(false);
+
+    [Menu("Minimum score to highlight tablet for crafting")]
+    public RangeNode<int> MinimumCraftHighlightScore { get; set; } = new RangeNode<int>(20, 0, 1000);
+
+    [Menu("Minimum score to highlight tablet for running")]
+    public RangeNode<int> MinimumRunHighlightScore { get; set; } = new RangeNode<int>(50, 0, 1000);
+
+    [Menu("Score per 1% item quantity in tablet")]
+    public RangeNode<int> ScorePerQuantity { get; set; } = new RangeNode<int>(4, 0, 100);
 }
 
 [Submenu(CollapsedByDefault = false)]

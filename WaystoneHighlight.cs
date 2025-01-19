@@ -40,7 +40,7 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
     public override void Render()
     {
         IList<WaystoneItem> waystones = [];
-
+        IList<TabletItem> tablets = [];
 
         var stashPanel = InGameState.IngameUi.StashElement;
         var stashPanelGuild = InGameState.IngameUi.GuildStashElement;
@@ -62,6 +62,8 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                 foreach (var item in stashPanel.VisibleStash.VisibleInventoryItems)
                 {
                     waystones.Add(new WaystoneItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Map>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
+                    tablets.Add(new TabletItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
+
                 }
             }
             else if (stashPanelGuild.IsVisible && stashPanelGuild != null)
@@ -73,6 +75,7 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                 foreach (var item in stashPanelGuild.VisibleStash.VisibleInventoryItems)
                 {
                     waystones.Add(new WaystoneItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Map>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
+                    tablets.Add(new TabletItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
                 }
             } 
             // Add inventory items
@@ -80,6 +83,7 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
             foreach (var item in inventoryItems)
             {
                 waystones.Add(new(item.Item.GetComponent<Base>(), item.Item.GetComponent<Map>(), item.Item.GetComponent<Mods>(), item.GetClientRect(), ItemLocation.Inventory));
+                tablets.Add(new(item.Item.GetComponent<Base>(), item.Item.GetComponent<Mods>(), item.GetClientRect(), ItemLocation.Inventory));
             }
 
             foreach (var waystone in waystones)
@@ -285,6 +289,99 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                     }
                 }
 
+            }
+
+            //tablets
+            foreach (var tablet in tablets)
+            {
+                if (tablet.type != ItemType.PrecursorTablet)
+                continue;
+
+                var itemMods = tablet.mods;
+                var bbox = tablet.rect;
+
+                int prefixCount = 0;
+                int suffixCount = 0;
+                int score = 0;
+                int iiq = 0;
+                bool isCorrupted = tablet.baseComponent.isCorrupted;
+
+                // Iterate through the mods
+                foreach (var mod in itemMods.ItemMods)
+                {
+                    if (mod.Name == "TowerDroppedItemQuantityIncrease")
+                    {
+                        iiq += mod.Values[0];
+                    }
+
+                    // Count prefixes and suffixes
+                    if (mod.DisplayName.StartsWith("of", StringComparison.OrdinalIgnoreCase))
+                    {
+                        suffixCount++;
+                    }
+                    else
+                    {
+                        prefixCount++;
+                    }
+                }
+
+                // Calculate score based on quantity
+                score += iiq * Settings.TabletScore.ScorePerQuantity;
+
+                // Drawing logic for tablets
+                if (score >= Settings.TabletScore.MinimumCraftHighlightScore)
+                {
+                    if (prefixCount < 1)
+                    {
+                        switch (Settings.Graphics.CraftHightlightStyle)
+                        {
+                            case 1:
+                                DrawBorderHighlight(bbox, Settings.Graphics.CraftHighlightColor, Settings.Graphics.BorderHighlight.CraftBorderThickness.Value);
+                                break;
+                            case 2:
+                                DrawBoxHighlight(bbox, Settings.Graphics.CraftHighlightColor, Settings.Graphics.BoxHighlight.CraftBoxRounding.Value);
+                                break;
+                        }
+                    }
+                    else if (score >= Settings.TabletScore.MinimumRunHighlightScore)
+                    {
+                        switch (Settings.Graphics.RunHightlightStyle)
+                        {
+                            case 1:
+                                DrawBorderHighlight(bbox, Settings.Graphics.RunHighlightColor, Settings.Graphics.BorderHighlight.RunBorderThickness.Value);
+                                break;
+                            case 2:
+                                DrawBoxHighlight(bbox, Settings.Graphics.RunHighlightColor, Settings.Graphics.BoxHighlight.RunBoxRounding.Value);
+                                break;
+                        }
+                    }
+                }
+
+                if (tablet.location == ItemLocation.Inventory || (tablet.location == ItemLocation.Stash && !isQuadTab))
+                {
+
+                    // Stats
+                    // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
+                    using (Graphics.SetTextScale(Settings.Graphics.FontSize.QRFontSizeMultiplier))
+                    {
+                        Graphics.DrawText(iiq.ToString(), new Vector2(bbox.Left + 5, bbox.Top + 2 + (10 * Settings.Graphics.FontSize.QRFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Left);
+                    }
+
+                    // Affixes count
+                    // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
+                    using (Graphics.SetTextScale(Settings.Graphics.FontSize.PrefSuffFontSizeMultiplier))
+                    {
+                        Graphics.DrawText(prefixCount.ToString(), new Vector2(bbox.Right - 5, bbox.Top), ExileCore2.Shared.Enums.FontAlign.Right);
+                        Graphics.DrawText(suffixCount.ToString(), new Vector2(bbox.Right - 5, bbox.Top + 2 + (10 * Settings.Graphics.FontSize.PrefSuffFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Right);
+                    }
+
+                    // Score
+                    // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
+                    using (Graphics.SetTextScale(Settings.Graphics.FontSize.ScoreFontSizeMultiplier))
+                    {
+                        Graphics.DrawText(score.ToString(), new Vector2(bbox.Left + 5, bbox.Bottom - 5 - (15 * Settings.Graphics.FontSize.ScoreFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Left);
+                    }
+                }
             }
         }
     }
