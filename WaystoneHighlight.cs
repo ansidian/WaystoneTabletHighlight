@@ -90,16 +90,12 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
 
             }
 
+            // For waystones
             foreach (var waystone in waystones)
             {
-
                 var item = waystone.map;
 
-                if (item == null)
-                    continue;
-
-                // Check for map tier
-                if (item.Tier < Settings.Score.MinimumTier)
+                if (item == null || item.Tier < Settings.Score.MinimumTier)
                 {
                     continue;
                 }
@@ -298,9 +294,16 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
             //tablets
             foreach (var tablet in tablets)
             {
-
                 if (tablet.baseComponent == null || tablet.mods == null)
-                continue;
+                    continue;
+
+                // Check if this item has any tablet-specific mods
+                bool isTablet = tablet.mods.ItemMods.Any(mod => 
+                    mod.Group == "TowerAddContent" || // Implicit mod group for tablets
+                    mod.Name.StartsWith("Tower")); // Tablet explicit mods start with "Tower"
+                    
+                if (!isTablet)
+                    continue;
 
                 var itemMods = tablet.mods;
                 var bbox = tablet.rect;
@@ -377,14 +380,6 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
 
                 if (tablet.location == ItemLocation.Inventory || (tablet.location == ItemLocation.Stash && !isQuadTab))
                 {
-
-                    // Stats
-                    // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
-                    using (Graphics.SetTextScale(Settings.Graphics.FontSize.QRFontSizeMultiplier))
-                    {
-                        Graphics.DrawText(iiq.ToString(), new Vector2(bbox.Left + 5, bbox.Top + 2 + (10 * Settings.Graphics.FontSize.QRFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Left);
-                    }
-
                     // Affixes count
                     // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
                     using (Graphics.SetTextScale(Settings.Graphics.FontSize.PrefSuffFontSizeMultiplier))
