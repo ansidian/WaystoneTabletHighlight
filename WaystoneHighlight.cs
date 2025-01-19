@@ -59,6 +59,7 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                 {
                     isQuadTab = true;
                 }
+
                 foreach (var item in stashPanel.VisibleStash.VisibleInventoryItems)
                 {
                     waystones.Add(new WaystoneItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Map>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
@@ -72,10 +73,12 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                 {
                     isQuadTab = true;
                 }
+                
                 foreach (var item in stashPanelGuild.VisibleStash.VisibleInventoryItems)
                 {
                     waystones.Add(new WaystoneItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Map>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
                     tablets.Add(new TabletItem(item.Item.GetComponent<Base>(), item.Item.GetComponent<Mods>(), item.GetClientRectCache, ItemLocation.Stash));
+
                 }
             } 
             // Add inventory items
@@ -84,6 +87,7 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
             {
                 waystones.Add(new(item.Item.GetComponent<Base>(), item.Item.GetComponent<Map>(), item.Item.GetComponent<Mods>(), item.GetClientRect(), ItemLocation.Inventory));
                 tablets.Add(new(item.Item.GetComponent<Base>(), item.Item.GetComponent<Mods>(), item.GetClientRect(), ItemLocation.Inventory));
+
             }
 
             foreach (var waystone in waystones)
@@ -294,7 +298,8 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
             //tablets
             foreach (var tablet in tablets)
             {
-                if (tablet.type != ItemType.PrecursorTablet)
+
+                if (tablet.baseComponent == null || tablet.mods == null)
                 continue;
 
                 var itemMods = tablet.mods;
@@ -304,15 +309,15 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                 int suffixCount = 0;
                 int score = 0;
                 int iiq = 0;
-                bool isCorrupted = tablet.baseComponent.isCorrupted;
+                int increasedRares = 0;
+
+                var drawColor = Color.White;
 
                 // Iterate through the mods
-                foreach (var mod in itemMods.ItemMods)
-                {
-                    if (mod.Name == "TowerDroppedItemQuantityIncrease")
-                    {
-                        iiq += mod.Values[0];
-                    }
+                foreach (var mod in itemMods.ItemMods) {
+                    // Skip implicit mods for prefix/suffix counting
+                    if (mod.Group == "TowerAddContent")
+                        continue;
 
                     // Count prefixes and suffixes
                     if (mod.DisplayName.StartsWith("of", StringComparison.OrdinalIgnoreCase))
@@ -323,15 +328,28 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                     {
                         prefixCount++;
                     }
+                
+
+                    // Find good mods
+                    switch (mod.Name)
+                    {
+                        case "TowerDroppedItemQuantityIncrease":
+                            iiq += mod.Values[0];
+                            break;
+                        case "TowerRarePackIncrease":
+                            increasedRares += mod.Values[0];
+                            break;
+                    }
                 }
 
-                // Calculate score based on quantity
+                // Calculate score
                 score += iiq * Settings.TabletScore.ScorePerQuantity;
+                score += increasedRares * Settings.TabletScore.ScorePerIncreasedRares;
 
                 // Drawing logic for tablets
                 if (score >= Settings.TabletScore.MinimumCraftHighlightScore)
                 {
-                    if (prefixCount < 1)
+                    if (prefixCount == 0)
                     {
                         switch (Settings.Graphics.CraftHightlightStyle)
                         {

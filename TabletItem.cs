@@ -1,36 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using ExileCore2.PoEMemory.Components;
 using ExileCore2.Shared;
 
 namespace WaystoneHighlight
 {
-    internal struct TabletItem
+    internal struct TabletItem(Base baseComponent, Mods modsComponent, RectangleF rectangleF, ItemLocation location)
     {
-        public Base baseComponent;
-        public Mods mods;
-        public RectangleF rect;
-        public ItemLocation location;
-        public ItemType type;
-
-        public TabletItem(Base baseComponent, Mods modsComponent, RectangleF rectangleF, ItemLocation location)
-        {
-            this.baseComponent = baseComponent;
-            this.mods = modsComponent;
-            this.rect = rectangleF;
-            this.location = location;
-            this.type = DetermineItemType(modsComponent);
-        }
-
-        private static ItemType DetermineItemType(Mods mods)
-        {
-            if (mods == null) return ItemType.Waystone;
-
-            foreach (var mod in mods.ItemMods)
-            {
-                if (mod.Name.Contains("TowerDropped"))
-                    return ItemType.PrecursorTablet;
-            }
-
-            return ItemType.Waystone;
-        }
+        public Base baseComponent = baseComponent;
+        public Mods mods = modsComponent;
+        public RectangleF rect = rectangleF;
+        public ItemLocation location = location;
     }
 }
