@@ -5,13 +5,13 @@ A fork of [WaystoneHighlight](https://github.com/kvcrek/WaystoneHighlight) with 
 ## Features
 - Includes original WaystoneHighlight functionality
 - Added scoring support for Precursor Tablets
-- Currently supports Item Quantity (IIQ) evaluation
+- Currently supports Item Quantity (IIQ) and Increased Rares evaluation
 
 ## Current Implementation
-- Only evaluates Item Quantity (IIQ) modifiers
+- Evaluates generic IIQ or Increased Rare mods
 
-## Planned Features
-- Potential support for Rare Monster scoring (TBD)
+## Future Updates
+- Possibly add more mods to the scoring critera
 
 ## Credits
 Original project by [kvcrek](https://github.com/kvcrek)
