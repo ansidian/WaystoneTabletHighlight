@@ -265,8 +265,8 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                     // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
                     using (Graphics.SetTextScale(Settings.Graphics.FontSize.QRFontSizeMultiplier))
                     {
-                        Graphics.DrawText(iir.ToString(), new Vector2(bbox.Left + 5, bbox.Top), ExileCore2.Shared.Enums.FontAlign.Left);
-                        Graphics.DrawText(iiq.ToString(), new Vector2(bbox.Left + 5, bbox.Top + 2 + (10 * Settings.Graphics.FontSize.QRFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Left);
+                        Graphics.DrawText(iiq.ToString(), new Vector2(bbox.Left + 5, bbox.Top), ExileCore2.Shared.Enums.FontAlign.Left);
+                        Graphics.DrawText(iir.ToString(), new Vector2(bbox.Left + 5, bbox.Top + 2 + (10 * Settings.Graphics.FontSize.QRFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Left);
                         if (extraRareMod)
                         {
                             Graphics.DrawText("+1", new Vector2(bbox.Left + 5, bbox.Top + 4 + (20 * Settings.Graphics.FontSize.QRFontSizeMultiplier)), ExileCore2.Shared.Enums.FontAlign.Left);
@@ -352,7 +352,7 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                 // Drawing logic for tablets
                 if (score >= Settings.TabletScore.MinimumCraftHighlightScore)
                 {
-                    if (prefixCount == 0)
+                    if (suffixCount == 0 || prefixCount == 0)
                     {
                         switch (Settings.Graphics.CraftHightlightStyle)
                         {
@@ -378,8 +378,19 @@ public class WaystoneHighlight : BaseSettingsPlugin<WaystoneHighlightSettings>
                     }
                 }
 
+                var addContentAmount = itemMods.ItemMods
+                    .Where(mod => mod.Group == "TowerAddContent")
+                    .Select(mod => mod.Values.FirstOrDefault())
+                    .FirstOrDefault();
+
                 if (tablet.location == ItemLocation.Inventory || (tablet.location == ItemLocation.Stash && !isQuadTab))
                 {
+                    // AddContentAmount
+                    using (Graphics.SetTextScale(Settings.Graphics.FontSize.QRFontSizeMultiplier))
+                    {
+                        Graphics.DrawText(addContentAmount.ToString(), new Vector2(bbox.Left + 5, bbox.Top), ExileCore2.Shared.Enums.FontAlign.Left);
+                    }
+
                     // Affixes count
                     // SetTextScale doesn't scale well we need to change origin point or add x:y placement modifications depending on scale
                     using (Graphics.SetTextScale(Settings.Graphics.FontSize.PrefSuffFontSizeMultiplier))
